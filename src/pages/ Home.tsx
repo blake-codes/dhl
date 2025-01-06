@@ -27,17 +27,24 @@ const HeroSection = styled.section`
 
   @media (max-width: 768px) {
     margin-top: 40px;
+    padding: 1rem;
   }
 `;
 
 const Section = styled.section`
   padding: 4rem;
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
 `;
 
 const GridContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const ServiceCard = styled.div`
@@ -55,6 +62,10 @@ const ServiceCard = styled.div`
   img {
     width: 100%;
     border-radius: 12px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
   }
 `;
 
@@ -88,6 +99,10 @@ const TestimonialCard = styled.div`
   h3 {
     margin: 1rem 0 0.5rem;
     color: #2c3e50;
+  }
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
   }
 `;
 
