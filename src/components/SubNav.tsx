@@ -8,6 +8,7 @@ const SubNav = styled.nav`
   align-items: center;
   padding: 10px 20px;
   color: black;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   height: 50px;
   margin-top: 55px;
 
@@ -79,7 +80,7 @@ const SubNavBar = () => {
 
       {/* Right side with a dropdown icon */}
       <NavLinksRight>
-        <Link to="/language">
+        <Link to="/login">
           Customer Portal Login <FaChevronDown />
         </Link>
       </NavLinksRight>

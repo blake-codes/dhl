@@ -67,7 +67,7 @@ const NavBar = styled.nav<NavProps>`
 
   li {
     display: flex;
-    align-items: center; /* Center icons and text vertically */
+    align-items: center;
     cursor: pointer;
     transition: color 0.3s;
 
@@ -77,12 +77,12 @@ const NavBar = styled.nav<NavProps>`
 
     a {
       display: flex;
-      align-items: center; /* Align the text and icon in a straight line */
+      align-items: center;
       text-decoration: none;
       color: black;
       font-size: small;
       font-weight: 300;
-      gap: 8px; /* Space between icon and text */
+      gap: 8px;
 
       &:hover {
         color: #eb131e;
@@ -92,7 +92,7 @@ const NavBar = styled.nav<NavProps>`
   }
 `;
 
-const Logo = styled.div`
+const Logo = styled(Link)`
   img {
     height: 120px;
     width: 180px;
@@ -109,7 +109,7 @@ const Navbar = () => {
 
   return (
     <NavBar $isOpen={isOpen}>
-      <Logo>
+      <Logo to="/">
         <img src="/assets/images/dhl.png" alt="DHL Logo" />
       </Logo>
       <div className="hamburger" onClick={toggleMenu}>
@@ -161,8 +161,8 @@ const Navbar = () => {
 
         {isOpen && (
           <li style={{ marginBottom: "40px" }}>
-            <Link to="/" onClick={() => setIsOpen(false)}>
-              <FaUser /> Customer Profile Login
+            <Link to="/login" onClick={() => setIsOpen(false)}>
+              <FaUser /> Customer Portal Login
             </Link>
           </li>
         )}

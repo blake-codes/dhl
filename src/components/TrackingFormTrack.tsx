@@ -1,15 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import axios from "../services/api";
 
 const FormContainer = styled.div`
-  width: 55%;
+  width: auto;
   margin: 20px;
   padding: 1.5rem;
-  margin-top: -80px;
   @media (max-width: 768px) {
-    margin-top: -100px;
-    width: 95%;
+    width: auto;
   }
 `;
 
@@ -18,7 +16,6 @@ const Title = styled.h2`
   text-align: left;
   margin-bottom: 1rem;
   font-family: "Poppins", sans-serif;
-  color: #fff;
 `;
 
 const InputContainer = styled.div`
@@ -68,15 +65,24 @@ const Button = styled.button`
   }
 `;
 
-const TrackingForm = () => {
-  const [trackingNumber, setTrackingNumber] = useState("");
-  const navigate = useNavigate();
+const ResultContainer = styled.pre`
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f5f5f5;
+  border-radius: 10px;
+`;
 
-  const handleSubmit = () => {
-    if (trackingNumber) {
-      navigate(`/track?trackingNumber=${trackingNumber}`);
-    } else {
-      alert("Please enter a tracking number.");
+const TrackingFormTrack = () => {
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [data, setData] = useState(null);
+
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.get(`/api/orders/track/${trackingNumber}`);
+      setData(response.data);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      alert("Tracking number not found.");
     }
   };
 
@@ -91,8 +97,11 @@ const TrackingForm = () => {
         />
         <Button onClick={handleSubmit}>Track</Button>
       </InputContainer>
+      {data && (
+        <ResultContainer>{JSON.stringify(data, null, 2)}</ResultContainer>
+      )}
     </FormContainer>
   );
 };
 
-export default TrackingForm;
+export default TrackingFormTrack;
