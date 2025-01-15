@@ -8,10 +8,14 @@ import {
   FaBars,
   FaTimes,
   FaUser,
+  FaChevronDown,
+  FaSignOutAlt,
 } from "react-icons/fa";
+import { useAuth } from "../AuthContext";
 
 interface NavProps {
   $isOpen: boolean;
+  $isDropdownOpen: boolean;
 }
 
 const NavBar = styled.nav<NavProps>`
@@ -90,6 +94,27 @@ const NavBar = styled.nav<NavProps>`
       }
     }
   }
+
+  .dropdown {
+    position: absolute;
+    background-color: white;
+    top: 60px;
+    right: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    display: ${({ $isDropdownOpen }) => ($isDropdownOpen ? "block" : "none")};
+    z-index: 1001;
+  }
+
+  .dropdown li {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #f1f1f1;
+    }
+  }
 `;
 
 const Logo = styled(Link)`
@@ -100,15 +125,35 @@ const Logo = styled(Link)`
   }
 `;
 
+const AdminDropdown = styled.div`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: small;
+  font-weight: 300;
+  gap: 8px;
+
+  &:hover {
+    color: #eb131e;
+    text-decoration: underline;
+  }
+`;
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { isAuthenticated, username, logout } = useAuth();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
   return (
-    <NavBar $isOpen={isOpen}>
+    <NavBar $isOpen={isOpen} $isDropdownOpen={isDropdownOpen}>
       <Logo to="/">
         <img src="/assets/images/dhl.png" alt="DHL Logo" />
       </Logo>
@@ -116,6 +161,21 @@ const Navbar = () => {
         {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
       </div>
       <ul>
+        {isOpen && isAuthenticated && (
+          <li>
+            <Link to="/dashboard" onClick={() => setIsOpen(false)}>
+              Dashboard
+            </Link>
+          </li>
+        )}
+
+        {isOpen && isAuthenticated && username === "admin" && (
+          <li>
+            <Link to="/messages" onClick={() => setIsOpen(false)}>
+              Messages
+            </Link>
+          </li>
+        )}
         {isOpen && (
           <li>
             <Link to="/" onClick={() => setIsOpen(false)}>
@@ -125,14 +185,14 @@ const Navbar = () => {
         )}
         {isOpen && (
           <li>
-            <Link to="/" onClick={() => setIsOpen(false)}>
+            <Link to="/ship" onClick={() => setIsOpen(false)}>
               Ship
             </Link>
           </li>
         )}
         {isOpen && (
           <li>
-            <Link to="/" onClick={() => setIsOpen(false)}>
+            <Link to="/help" onClick={() => setIsOpen(false)}>
               Customer Service
             </Link>
           </li>
@@ -158,11 +218,45 @@ const Navbar = () => {
             </Link>
           </li>
         )}
+        {/* Styled admin dropdown */}
+        {!isOpen && isAuthenticated && (
+          <li onClick={toggleDropdown}>
+            <AdminDropdown>
+              <FaUser /> {username} <FaChevronDown />
+            </AdminDropdown>
+            <ul className="dropdown">
+              <li>
+                <Link to="/dashboard" onClick={() => setIsDropdownOpen(false)}>
+                  Dashboard
+                </Link>
+              </li>
+              {username === "admin" && (
+                <li>
+                  <Link to="/messages" onClick={() => setIsDropdownOpen(false)}>
+                    Messages
+                  </Link>
+                </li>
+              )}
 
-        {isOpen && (
-          <li style={{ marginBottom: "40px" }}>
+              <li>
+                <Link to="/" onClick={logout}>
+                  <FaSignOutAlt /> Logout
+                </Link>
+              </li>
+            </ul>
+          </li>
+        )}
+        {isOpen && !isAuthenticated && (
+          <li>
             <Link to="/login" onClick={() => setIsOpen(false)}>
               <FaUser /> Customer Portal Login
+            </Link>
+          </li>
+        )}
+        {isOpen && isAuthenticated && (
+          <li style={{ marginBottom: "40px" }}>
+            <Link to="/" onClick={logout}>
+              <FaSignOutAlt /> Logout
             </Link>
           </li>
         )}

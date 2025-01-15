@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { FaChevronDown } from "react-icons/fa";
+import { useAuth } from "../AuthContext";
 
 const SubNav = styled.nav`
   display: flex;
@@ -60,6 +61,8 @@ const NavLinksRight = styled.div`
 `;
 
 const SubNavBar = () => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <SubNav>
       {/* Left side with four items */}
@@ -67,23 +70,24 @@ const SubNavBar = () => {
         <Link to="/">
           Track <FaChevronDown />
         </Link>
-        <Link to="/tracking">
+        <Link to="/ship">
           Ship <FaChevronDown />
         </Link>
         <Link to="/services">
           Enterprise Logistics Service <FaChevronDown />
         </Link>
-        <Link to="/support">
+        <Link to="/help">
           Customer Service <FaChevronDown />
         </Link>
       </NavLinksLeft>
-
+      {!isAuthenticated && (
+        <NavLinksRight>
+          <Link to="/login">
+            Customer Portal Login <FaChevronDown />
+          </Link>
+        </NavLinksRight>
+      )}
       {/* Right side with a dropdown icon */}
-      <NavLinksRight>
-        <Link to="/login">
-          Customer Portal Login <FaChevronDown />
-        </Link>
-      </NavLinksRight>
     </SubNav>
   );
 };

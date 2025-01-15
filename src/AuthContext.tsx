@@ -2,28 +2,47 @@ import React, { createContext, useState, useContext, ReactNode } from "react";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: () => void;
+  username: string | null;
+  login: (token: string, username: string) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
+const isTokenValid = (token: string): boolean => {
+  try {
+    const { exp } = JSON.parse(atob(token.split(".")[1])); // Decode token payload
+    return Date.now() < exp * 1000; // Check expiration time
+  } catch {
+    return false; // Invalid token format
+  }
+};
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const token = localStorage.getItem("token");
-    return !!token; // Initialize based on token presence
+    return token ? isTokenValid(token) : false;
   });
+  const [username, setUsername] = useState<string | null>(() =>
+    localStorage.getItem("username")
+  );
 
-  const login = () => setIsAuthenticated(true);
+  const login = (token: string, username: string) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("username", username);
+    setIsAuthenticated(true);
+    setUsername(username);
+  };
+
   const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
     setIsAuthenticated(false);
-    localStorage.removeItem("token"); // Remove token on logout
+    setUsername(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, username, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

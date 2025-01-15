@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../AuthContext";
+
 import Navbar from "../components/NavBar";
 import SubNavBar from "../components/SubNav";
 import Footer from "../components/Footer";
 import styled from "styled-components";
+import { useAuth } from "../AuthContext";
 
 const FormContainer = styled.div`
   display: flex;
@@ -18,6 +19,7 @@ const FormContainer = styled.div`
     margin-top: 100px;
   }
 `;
+
 const Box = styled.div`
   display: flex;
   justify-content: center;
@@ -88,23 +90,28 @@ const Login: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch("https://dhl-server.onrender.com/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      const response = await fetch(
+        "https://dhl-server.onrender.com/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password }),
+        }
+      );
 
-      const data: { message?: string; token?: string } = await response.json();
+      const data: { message?: string; token?: string; username?: string } =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(data.message || "Failed to login");
       }
 
       localStorage.setItem("token", data.token || "");
-      login();
-      navigate("/messages");
+      localStorage.setItem("username", data.username || "");
+      login(data.token || "", data.username || "");
+      navigate("/dashboard");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "An unknown error occurred"

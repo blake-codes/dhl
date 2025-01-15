@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import styled from "styled-components";
 import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 import SubNavBar from "../components/SubNav";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../AuthContext";
 
 const BaseContainer = styled.div`
   background: #f4f7fc;
@@ -14,7 +14,7 @@ const BaseContainer = styled.div`
   font-family: "Roboto", sans-serif;
   color: #333;
   @media (max-width: 768px) {
-    margin-top: 60px;
+    margin-top: 50px;
   }
 `;
 
@@ -75,23 +75,31 @@ const TableCell = styled.td`
 `;
 
 const Dashboard = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [orders, setOrders] = useState([
-    {
-      trackingId: "DHL123456789",
-      senderName: "Alice Smith",
-      receiverName: "Bob Johnson",
-    },
-    {
-      trackingId: "DHL987654321",
-      senderName: "Charlie Brown",
-      receiverName: "Dana White",
-    },
-  ]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [orders, setOrders] = useState<any[]>([]);
+  const { username } = useAuth();
 
-  const handleOrderClick = (order: any) => {
-    alert(`You clicked on order with Tracking ID: ${order.trackingId}`);
-  };
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const url =
+          username === "admin"
+            ? "https://dhl-server.onrender.com/api/orders"
+            : `https://dhl-server.onrender.com/api/orders/find/${username}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("Failed to fetch orders");
+        }
+        const data = await response.json();
+        setOrders(data);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    };
+
+    fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
@@ -100,9 +108,12 @@ const Dashboard = () => {
       <BaseContainer>
         <DashboardContainer>
           <DashboardTitle>Shipping Orders</DashboardTitle>
-          <Link to="/add-shipment-order">
-            <ActionButton>Add Shipping Order</ActionButton>
-          </Link>
+          {username === "admin" && (
+            <Link to="/add-shipment-order">
+              <ActionButton>Add Shipping Order</ActionButton>
+            </Link>
+          )}
+
           {orders.length === 0 ? (
             <p>No orders yet.</p>
           ) : (
@@ -110,21 +121,23 @@ const Dashboard = () => {
               <thead>
                 <tr>
                   <TableHeader>Tracking ID</TableHeader>
+                  <TableHeader>Shipment Name</TableHeader>
                   <TableHeader>Sender</TableHeader>
                   <TableHeader>Receiver</TableHeader>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((order, index) => (
-                  <TableRow key={index} onClick={() => handleOrderClick(order)}>
+                  <TableRow key={index}>
                     <TableCell>
                       <Link
-                        to={`/order/${order.trackingId}`}
+                        to={`/order/${order.trackingNumber}`}
                         style={{ textDecoration: "none", color: "#0275d8" }}
                       >
-                        {order.trackingId}
+                        {order.trackingNumber}
                       </Link>
                     </TableCell>
+                    <TableCell>{order.shipmentName}</TableCell>
                     <TableCell>{order.senderName}</TableCell>
                     <TableCell>{order.receiverName}</TableCell>
                   </TableRow>

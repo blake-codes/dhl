@@ -3,6 +3,8 @@ import Navbar from "../components/NavBar";
 import TrackingForm from "../components/TrackingForm";
 import Footer from "../components/Footer";
 import SubNavBar from "../components/SubNav";
+import { useEffect } from "react";
+import axios from "axios";
 
 const HeroSection = styled.section`
   display: flex;
@@ -142,6 +144,20 @@ const Testimonials = () => (
 );
 
 const Home = () => {
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const response = await axios.get(
+          "https://dhl-server.onrender.com/api/auth/healthcheck"
+        );
+        console.log("Healthcheck successful:", response.data);
+      } catch (error) {
+        console.error("Healthcheck failed:", error);
+      }
+    };
+
+    checkHealth();
+  }, []);
   return (
     <>
       <Navbar />

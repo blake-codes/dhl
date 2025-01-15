@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import styled from "styled-components";
 import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 import { FaArrowRight } from "react-icons/fa";
 import TrackingFormTrack from "../components/TrackingFormTrack";
 import SubNavBar from "../components/SubNav";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 
 const BaseContainer = styled.div`
   color: #333;
@@ -26,6 +30,15 @@ const Section = styled.section`
   @media (max-width: 768px) {
     padding: 2rem;
   }
+`;
+
+const Loader = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  font-size: 1.5rem;
+  font-weight: bold;
 `;
 
 const TrackingDetails = styled.div`
@@ -79,31 +92,27 @@ const DetailText = styled.p`
 `;
 
 const Track = () => {
-  const trackingInfo = {
-    trackingCode: "DHL123456789",
-    status: "In Transit",
-    origin: "Berlin, Germany",
-    destination: "Rome, Italy",
-    currentLocation: "Paris, France",
-    shipmentDetails: {
-      weight: "2.5kg",
-      dimensions: "30x20x10 cm",
-      serviceType: "Express",
-    },
-    movementHistory: [
-      {
-        date: "2024-09-10",
-        location: "Berlin, Germany",
-        status: "Shipment Created",
-      },
-      {
-        date: "2024-09-11",
-        location: "Leipzig, Germany",
-        status: "Departed Hub",
-      },
-      { date: "2024-09-12", location: "Paris, France", status: "In Transit" },
-    ],
-  };
+  const { trackingNumber } = useParams<{ trackingNumber: string }>();
+
+  const [trackingInfo, setTrackingInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTrackingInfo = async () => {
+      try {
+        const response = await axios.get(
+          `https://dhl-server.onrender.com/api/orders/${trackingNumber}`
+        );
+        setTrackingInfo(response.data);
+      } catch (error) {
+        console.error("Failed to fetch tracking info", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrackingInfo();
+  }, [trackingNumber]);
 
   return (
     <>
@@ -111,59 +120,67 @@ const Track = () => {
       <SubNavBar />
       <BaseContainer>
         <TrackingFormTrack />
-        <Section>
-          <Title>Tracking Details</Title>
-          <TrackingDetails>
-            <DetailText>
-              <strong>Tracking Code:</strong> {trackingInfo.trackingCode}
-            </DetailText>
-            <DetailText>
-              <strong>Status:</strong> {trackingInfo.status}
-            </DetailText>
-            <DetailText>
-              <strong>Origin:</strong> {trackingInfo.origin}
-            </DetailText>
-            <DetailText>
-              <strong>Destination:</strong> {trackingInfo.destination}
-            </DetailText>
-            <DetailText>
-              <strong>Current Location:</strong> {trackingInfo.currentLocation}
-            </DetailText>
+        {loading ? (
+          <Loader>Loading...</Loader>
+        ) : trackingInfo ? (
+          <Section>
+            <Title>Tracking Details</Title>
+            <TrackingDetails>
+              <DetailText>
+                <strong>Tracking Code:</strong> {trackingInfo.trackingNumber}
+              </DetailText>
+              <DetailText>
+                <strong>Status:</strong> {trackingInfo.status}
+              </DetailText>
+              <DetailText>
+                <strong>Origin:</strong> {trackingInfo.origin}
+              </DetailText>
+              <DetailText>
+                <strong>Destination:</strong> {trackingInfo.destination}
+              </DetailText>
+              <DetailText>
+                <strong>Current Location:</strong>{" "}
+                {trackingInfo.currentLocation}
+              </DetailText>
 
-            <SubHeading>Shipment Details</SubHeading>
-            <DetailText>
-              <strong>Weight:</strong> {trackingInfo.shipmentDetails.weight}
-            </DetailText>
-            <DetailText>
-              <strong>Dimensions:</strong>{" "}
-              {trackingInfo.shipmentDetails.dimensions}
-            </DetailText>
-            <DetailText>
-              <strong>Service Type:</strong>{" "}
-              {trackingInfo.shipmentDetails.serviceType}
-            </DetailText>
+              <SubHeading>Shipment Details</SubHeading>
+              <DetailText>
+                <strong>Weight:</strong> {trackingInfo.weight}
+              </DetailText>
+              <DetailText>
+                <strong>Dimensions:</strong> {trackingInfo.dimensions}
+              </DetailText>
+              <DetailText>
+                <strong>Service Type:</strong> Express
+              </DetailText>
 
-            <MovementHistory>
-              <SubHeading>Movement History</SubHeading>
-              {trackingInfo.movementHistory.map((item, index) => (
-                <HistoryItem key={index}>
-                  <ArrowIcon />
-                  <div>
-                    <DetailText>
-                      <strong>Date:</strong> {item.date}
-                    </DetailText>
-                    <DetailText>
-                      <strong>Location:</strong> {item.location}
-                    </DetailText>
-                    <DetailText>
-                      <strong>Status:</strong> {item.status}
-                    </DetailText>
-                  </div>
-                </HistoryItem>
-              ))}
-            </MovementHistory>
-          </TrackingDetails>
-        </Section>
+              <MovementHistory>
+                <SubHeading>Movement History</SubHeading>
+                {trackingInfo.movementHistory.map((item: any, index: any) => (
+                  <HistoryItem key={index}>
+                    <ArrowIcon />
+                    <div>
+                      <DetailText>
+                        <strong>Date:</strong>{" "}
+                        {new Date(item.movementDate).toLocaleDateString()}
+                      </DetailText>
+                      <DetailText>
+                        <strong>Location:</strong> {item.movementLocation}
+                      </DetailText>
+                      <DetailText>
+                        <strong>Status:</strong> {item.movementStatus}
+                      </DetailText>
+                    </div>
+                  </HistoryItem>
+                ))}
+              </MovementHistory>
+            </TrackingDetails>
+          </Section>
+        ) : (
+          <Loader>
+            The tracking code is invalid. Please check your tracking number.
+          </Loader>
+        )}
       </BaseContainer>
       <Footer />
     </>

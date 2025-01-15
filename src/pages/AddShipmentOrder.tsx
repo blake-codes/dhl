@@ -2,7 +2,9 @@ import styled from "styled-components";
 import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 import SubNavBar from "../components/SubNav";
-import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
+import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const BaseContainer = styled.div`
   display: flex;
@@ -13,8 +15,9 @@ const BaseContainer = styled.div`
   background: #f3f4f6;
   min-height: 100vh;
   margin-top: 10px;
+
   @media (max-width: 768px) {
-    margin-top: 60px;
+    margin-top: 20px;
   }
 `;
 
@@ -24,6 +27,7 @@ const Section = styled.section`
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   width: 100%;
+  max-width: 800px;
   margin: 3rem auto;
 
   @media (max-width: 768px) {
@@ -32,7 +36,7 @@ const Section = styled.section`
 `;
 
 const FormTitle = styled.h2`
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   text-align: center;
   margin-bottom: 2rem;
   color: #222;
@@ -45,10 +49,6 @@ const InputField = styled.input`
   border-radius: 8px;
   border: 1px solid #ddd;
   font-size: 1rem;
-
-  @media (max-width: 768px) {
-    font-size: 0.9rem;
-  }
 `;
 
 const SubmitButton = styled.button`
@@ -60,15 +60,9 @@ const SubmitButton = styled.button`
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s;
-  margin-top: 1.5rem;
 
   &:hover {
     background-color: #219150;
-  }
-
-  @media (max-width: 768px) {
-    width: 100%;
-    font-size: 0.9rem;
   }
 `;
 
@@ -79,14 +73,9 @@ const BackArrow = styled.button`
   font-size: 1.2rem;
   cursor: pointer;
   transition: color 0.3s;
-  margin-bottom: 1rem;
 
   &:hover {
     color: black;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 1rem;
   }
 `;
 
@@ -96,41 +85,137 @@ const FormWrapper = styled.form`
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin: auto 20px auto auto;
   gap: 0.5rem;
 `;
 
 const AddShipmentOrder: React.FC = () => {
-  const navigate = useNavigate(); // Initialize the navigate function
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle shipment order form submission
-    console.log("Shipment order submitted");
+    const form = e.target as HTMLFormElement;
+
+    const formData = {
+      shipmentName: form["shipmentName"].value,
+      origin: form["origin"].value,
+      destination: form["destination"].value,
+      currentLocation: form["currentLocation"].value,
+      senderName: form["senderName"].value,
+      receiverName: form["receiverName"].value,
+      receiverEmail: form["receiverEmail"].value,
+      receiverPhone: form["receiverPhone"].value,
+      receiverAddress: form["receiverAddress"].value,
+      status: form["status"].value,
+      weight: form["weight"].value,
+      dimensions: form["dimensions"].value,
+      movementHistory: [
+        {
+          movementLocation: form["movementLocation"].value,
+          movementDate: form["movementDate"].value,
+          movementStatus: form["movementStatus"].value,
+        },
+      ],
+      username: form["username"].value,
+      password: form["password"].value,
+      assignedOldUser: form["assignedOldUser"].value,
+    };
+
+    try {
+      const response = await fetch(
+        "https://dhl-server.onrender.com/api/orders",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Order created successfully!");
+        navigate(`/dashboard`);
+      } else {
+        toast.error(data.message || "Failed to create order.");
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      toast.error("Error submitting the order. Please try again.");
+    }
   };
 
   return (
     <>
       <Navbar />
       <SubNavBar />
+      <ToastContainer />
       <BaseContainer>
         <Section>
-          <BackArrow onClick={() => navigate(-1)}>← Back</BackArrow>{" "}
-          {/* Back arrow button */}
+          <BackArrow onClick={() => navigate(-1)}>← Back</BackArrow>
           <FormTitle>Add Shipment Order</FormTitle>
           <FormWrapper onSubmit={handleSubmit}>
-            <InputField type="text" placeholder="Shipment Name" required />
-            <InputField type="text" placeholder="Origin" required />
-            <InputField type="text" placeholder="Destination" required />
-            <InputField type="text" placeholder="Current Location" required />
-            <InputField type="text" placeholder="Sender Name" required />
-            <InputField type="text" placeholder="Receiver Name" required />
-            <InputField type="text" placeholder="Receiver Email" required />
-            <InputField type="text" placeholder="Receiver Phone" required />
-            <InputField type="text" placeholder="Receiver Address" required />
-            <InputField type="text" placeholder="Status" required />
-            <InputField type="text" placeholder="Weight" required />
-            <InputField type="text" placeholder="Dimensions" required />
+            <InputField
+              name="shipmentName"
+              placeholder="Shipment Name"
+              required
+            />
+            <InputField name="origin" placeholder="Origin" required />
+            <InputField name="destination" placeholder="Destination" required />
+            <InputField
+              name="currentLocation"
+              placeholder="Current Location"
+              required
+            />
+            <InputField name="senderName" placeholder="Sender Name" required />
+            <InputField
+              name="receiverName"
+              placeholder="Receiver Name"
+              required
+            />
+            <InputField
+              name="receiverEmail"
+              placeholder="Receiver Email"
+              required
+            />
+            <InputField
+              name="receiverPhone"
+              placeholder="Receiver Phone"
+              required
+            />
+            <InputField
+              name="receiverAddress"
+              placeholder="Receiver Address"
+              required
+            />
+            <InputField name="status" placeholder="Status" required />
+            <InputField name="weight" placeholder="Weight" required />
+            <InputField
+              name="dimensions"
+              placeholder="Dimensions (LxWxH)"
+              required
+            />
+
+            <FormTitle>Initial Movement History</FormTitle>
+            <InputField
+              name="movementLocation"
+              placeholder="Movement Location"
+              required
+            />
+            <InputField type="date" name="movementDate" required />
+            <InputField
+              name="movementStatus"
+              placeholder="Movement Status"
+              required
+            />
+
+            <FormTitle>User Login Details(new user)</FormTitle>
+            <InputField name="username" placeholder="Username" />
+            <InputField type="text" name="password" placeholder="Password" />
+
+            <FormTitle>Assign To User(old user)</FormTitle>
+            <InputField name="assignedOldUser" placeholder="Username" />
 
             <SubmitButton type="submit">Submit Order</SubmitButton>
           </FormWrapper>

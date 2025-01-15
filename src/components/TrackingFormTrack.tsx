@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import axios from "../services/api";
 
 const FormContainer = styled.div`
   width: auto;
@@ -65,24 +65,15 @@ const Button = styled.button`
   }
 `;
 
-const ResultContainer = styled.pre`
-  margin-top: 1rem;
-  padding: 1rem;
-  background: #f5f5f5;
-  border-radius: 10px;
-`;
-
 const TrackingFormTrack = () => {
   const [trackingNumber, setTrackingNumber] = useState("");
-  const [data, setData] = useState(null);
+  const navigate = useNavigate();
 
-  const handleSubmit = async () => {
-    try {
-      const response = await axios.get(`/api/orders/track/${trackingNumber}`);
-      setData(response.data);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      alert("Tracking number not found.");
+  const handleSubmit = () => {
+    if (trackingNumber) {
+      navigate(`/track/${trackingNumber}`);
+    } else {
+      alert("Please enter a tracking number.");
     }
   };
 
@@ -97,9 +88,6 @@ const TrackingFormTrack = () => {
         />
         <Button onClick={handleSubmit}>Track</Button>
       </InputContainer>
-      {data && (
-        <ResultContainer>{JSON.stringify(data, null, 2)}</ResultContainer>
-      )}
     </FormContainer>
   );
 };

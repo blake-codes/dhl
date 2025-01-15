@@ -74,7 +74,7 @@ const TrackingForm = () => {
 
   const handleSubmit = () => {
     if (trackingNumber) {
-      navigate(`/track?trackingNumber=${trackingNumber}`);
+      navigate(`/track/${trackingNumber}`);
     } else {
       alert("Please enter a tracking number.");
     }
