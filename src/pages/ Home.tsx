@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import SubNavBar from "../components/SubNav";
 import { useEffect } from "react";
 import axios from "axios";
+import ChatBot from "../components/ChatBot";
 
 const HeroSection = styled.section`
   display: flex;
@@ -140,6 +141,7 @@ const Testimonials = () => (
         <h3>Emily Carter</h3>
       </TestimonialCard>
     </GridContainer>
+    <ChatBot />
   </Section>
 );
 

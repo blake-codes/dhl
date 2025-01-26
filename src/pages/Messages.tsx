@@ -3,8 +3,8 @@ import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 import SubNavBar from "../components/SubNav";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
+import AdminChatBot from "../components/AdminChatBot";
 
 const BaseContainer = styled.div`
   background: #f4f7fc;
@@ -34,12 +34,15 @@ const MessagesTitle = styled.h1`
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+  margin-top: 20px;
 `;
 
 const TableHeader = styled.th`
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
+  background-color: #f2f2f2;
+  font-weight: bold;
 `;
 
 const TableRow = styled.tr`
@@ -57,36 +60,49 @@ const TableCell = styled.td`
   padding: 8px;
 `;
 
-interface Message {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _id: any;
-  name: string;
-  email: string;
+interface LatestMessage {
+  sender: string;
   message: string;
+  timestamp: string;
+}
+
+interface ChatSummary {
+  sessionId: string;
+  chatUser: string;
+  isActive: boolean;
+  createdAt: string;
+  latestMessage: LatestMessage | null;
 }
 
 const Messages = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [chats, setChats] = useState<ChatSummary[]>([]);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
+    null
+  );
   const { username } = useAuth();
 
   useEffect(() => {
-    const fetchMessages = async () => {
+    const fetchChats = async () => {
       try {
         const response = await fetch(
-          "https://dhl-server.onrender.com/api/messages"
+          "https://dhl-server.onrender.com/api/chat/"
         );
         if (!response.ok) {
-          throw new Error("Failed to fetch messages");
+          throw new Error("Failed to fetch chats");
         }
-        const data: Message[] = await response.json();
-        setMessages(data);
+        const data = await response.json();
+        setChats(data.chats); // Adjusted to match `chats` from the backend
       } catch (error) {
-        console.error("Error fetching messages:", error);
+        console.error("Error fetching chats:", error);
       }
     };
 
-    fetchMessages();
+    fetchChats();
   }, [username]);
+
+  const handleChatClick = (sessionId: string) => {
+    setSelectedSessionId(sessionId);
+  };
 
   return (
     <>
@@ -94,35 +110,56 @@ const Messages = () => {
       <SubNavBar />
       <BaseContainer>
         <MessagesContainer>
-          <MessagesTitle>Messages</MessagesTitle>
-          {messages.length === 0 ? (
-            <p>No messages yet.</p>
+          <MessagesTitle>Chat Sessions</MessagesTitle>
+          {chats.length === 0 ? (
+            <p>No chat sessions yet.</p>
           ) : (
             <Table>
               <thead>
                 <tr>
-                  <TableHeader>Name</TableHeader>
-                  <TableHeader>Email</TableHeader>
+                  <TableHeader>Chat User</TableHeader>
+                  <TableHeader>Created At</TableHeader>
+                  <TableHeader>Latest Message</TableHeader>
+                  <TableHeader>Actions</TableHeader>
                 </tr>
               </thead>
               <tbody>
-                {messages.map((message, index) => (
-                  <TableRow key={index}>
-                    <TableCell>
-                      <Link
-                        to={`/messages/${message._id}`}
-                        style={{ textDecoration: "none", color: "#0275d8" }}
-                      >
-                        {message.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{message.email}</TableCell>
-                  </TableRow>
-                ))}
+                {chats.map((chat, index) => {
+                  const latestMessage = chat.latestMessage;
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>{chat.chatUser}</TableCell>
+                      <TableCell>
+                        {new Date(chat.createdAt).toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        {latestMessage
+                          ? latestMessage.message
+                          : "No messages yet"}
+                      </TableCell>
+                      <TableCell>
+                        <button
+                          onClick={() => handleChatClick(chat.sessionId)}
+                          style={{
+                            background: "#4caf50",
+                            color: "white",
+                            border: "none",
+                            padding: "5px 10px",
+                            borderRadius: "5px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Open Chat
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </tbody>
             </Table>
           )}
         </MessagesContainer>
+        {selectedSessionId && <AdminChatBot sessionId={selectedSessionId} />}
       </BaseContainer>
       <Footer />
     </>
