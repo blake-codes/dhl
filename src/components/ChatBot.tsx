@@ -29,7 +29,7 @@ const ChatWindow = styled.div<{ isOpen: boolean }>`
   bottom: 20px;
   right: 20px;
   width: 350px;
-  max-width: 100%;
+  max-width: 90%;
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0px 6px 30px rgba(0, 0, 0, 0.2);
@@ -61,8 +61,15 @@ const ChatWindow = styled.div<{ isOpen: boolean }>`
       transform: translateY(20px);
     }
   }
-`;
 
+  @media (max-width: 600px) {
+    bottom: 10px;
+    right: 10px;
+    width: 90%;
+    height: 70%;
+    padding: 5px;
+  }
+`;
 const Header = styled.div`
   background-color: #4caf50;
   color: white;
@@ -103,6 +110,12 @@ const MessageBubble = styled.div<{ isUser: boolean }>`
   margin: 5px 0;
   align-self: ${({ isUser }) => (isUser ? "flex-end" : "flex-start")};
   word-wrap: break-word;
+
+  @media (max-width: 600px) {
+    padding: 8px;
+    max-width: 90%;
+    font-size: 12px;
+  }
 `;
 
 const InputArea = styled.div`
@@ -120,6 +133,11 @@ const InputField = styled.input`
   margin-right: 10px;
   font-size: 14px;
   transition: border-color 0.3s;
+
+  @media (max-width: 600px) {
+    font-size: 12px;
+    padding: 8px;
+  }
 `;
 
 const SendButton = styled.button`
@@ -134,6 +152,11 @@ const SendButton = styled.button`
 
   &:hover {
     background-color: #539c55;
+  }
+
+  @media (max-width: 600px) {
+    padding: 10px 12px;
+    font-size: 16px;
   }
 `;
 
@@ -156,6 +179,10 @@ const UserPromptOverlay = styled.div`
   justify-content: center;
   align-items: center;
   z-index: 20;
+  @media (max-width: 600px) {
+    padding: 15px;
+    width: 95%;
+  }
 `;
 
 const UserPromptContainer = styled.div`
@@ -298,6 +325,10 @@ const ChatBot: React.FC = () => {
       setShowUserPrompt(false);
     }
   };
+  const handleCloseModal = () => {
+    setShowUserPrompt(false);
+    setIsOpen(false);
+  };
 
   const handleSendMessage = () => {
     if (userInput.trim()) {
@@ -395,7 +426,7 @@ const ChatBot: React.FC = () => {
       {showUserPrompt && (
         <UserPromptOverlay>
           <UserPromptContainer>
-            <CloseModalButton onClick={() => setShowUserPrompt(false)}>
+            <CloseModalButton onClick={handleCloseModal}>
               <FaTimes />
             </CloseModalButton>
             <form onSubmit={handleNameSubmit}>
