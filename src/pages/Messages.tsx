@@ -2,7 +2,7 @@ import styled from "styled-components";
 import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 import SubNavBar from "../components/SubNav";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../AuthContext";
 import AdminChatBot from "../components/AdminChatBot";
 
@@ -79,7 +79,9 @@ const Messages = () => {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     null
   );
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const { username } = useAuth();
+  const chatBotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -102,6 +104,11 @@ const Messages = () => {
 
   const handleChatClick = (sessionId: string) => {
     setSelectedSessionId(sessionId);
+    setIsOpen(true); // Set isOpen to true when the button is clicked
+  };
+
+  const toggleChat = () => {
+    setIsOpen((prev) => !prev);
   };
 
   return (
@@ -112,7 +119,7 @@ const Messages = () => {
         <MessagesContainer>
           <MessagesTitle>Chat Sessions</MessagesTitle>
           {chats.length === 0 ? (
-            <p>No chat sessions yet.</p>
+            <p>No chat yet.</p>
           ) : (
             <Table>
               <thead>
@@ -140,16 +147,28 @@ const Messages = () => {
                       <TableCell>
                         <button
                           onClick={() => handleChatClick(chat.sessionId)}
+                          disabled={selectedSessionId === chat.sessionId}
                           style={{
-                            background: "#4caf50",
-                            color: "white",
+                            background:
+                              selectedSessionId === chat.sessionId
+                                ? "#ccc"
+                                : "#4caf50",
+                            color:
+                              selectedSessionId === chat.sessionId
+                                ? "#666"
+                                : "white",
                             border: "none",
                             padding: "5px 10px",
                             borderRadius: "5px",
-                            cursor: "pointer",
+                            cursor:
+                              selectedSessionId === chat.sessionId
+                                ? "not-allowed"
+                                : "pointer",
                           }}
                         >
-                          Open Chat
+                          {selectedSessionId === chat.sessionId
+                            ? "Chat Open"
+                            : "Open Chat"}
                         </button>
                       </TableCell>
                     </TableRow>
@@ -159,7 +178,15 @@ const Messages = () => {
             </Table>
           )}
         </MessagesContainer>
-        {selectedSessionId && <AdminChatBot sessionId={selectedSessionId} />}
+        {selectedSessionId && (
+          <div ref={chatBotRef}>
+            <AdminChatBot
+              sessionId={selectedSessionId}
+              isOpen={isOpen}
+              toggleChat={toggleChat}
+            />
+          </div>
+        )}
       </BaseContainer>
       <Footer />
     </>

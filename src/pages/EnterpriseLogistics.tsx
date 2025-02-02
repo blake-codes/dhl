@@ -3,6 +3,7 @@ import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 import SubNavBar from "../components/SubNav";
 import { useNavigate } from "react-router-dom";
+import ChatBot from "../components/ChatBot";
 
 const BaseContainer = styled.div`
   color: #333;
@@ -99,6 +100,7 @@ const EnterpriseLogistics: React.FC = () => {
           </ActionButton>
         </Section>
       </BaseContainer>
+      <ChatBot />
       <Footer />
     </>
   );

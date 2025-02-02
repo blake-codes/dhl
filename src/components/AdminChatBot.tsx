@@ -5,25 +5,6 @@ import axios from "axios";
 import { FaHeadset, FaTimes, FaUserShield } from "react-icons/fa";
 import io from "socket.io-client";
 
-// Styled Components
-const ChatButton = styled.div`
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #4caf50;
-  color: white;
-  padding: 15px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 26px;
-  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-
-  &:hover {
-    background-color: #59a35c;
-  }
-`;
-
 const ChatWindow = styled.div<{ isOpen: boolean }>`
   position: fixed;
   bottom: 20px;
@@ -81,6 +62,25 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
+`;
+
+const Loader = styled.div`
+  margin: 20px auto;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4caf50;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
 `;
 
 const HeaderUserInfo = styled.div`
@@ -167,12 +167,16 @@ const CloseButton = styled.button`
 `;
 
 // ChatBot Component
-const AdminChatBot: React.FC<{ sessionId: string }> = ({ sessionId }) => {
+const AdminChatBot: React.FC<{
+  sessionId: string;
+  isOpen: boolean;
+  toggleChat: () => void;
+}> = ({ sessionId, isOpen, toggleChat }) => {
   const [messages, setMessages] = useState<
     { text: string; id: string; isUser: boolean }[]
   >([]);
   const [userInput, setUserInput] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const messageContainerRef = useRef<HTMLDivElement | null>(null);
   const socket = useRef<any>(null);
 
@@ -194,10 +198,12 @@ const AdminChatBot: React.FC<{ sessionId: string }> = ({ sessionId }) => {
         });
       }
     );
+    fetchChatHistory();
     return () => {
       socket.current.disconnect();
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId]);
 
   useEffect(() => {
     if (messageContainerRef.current) {
@@ -217,20 +223,12 @@ const AdminChatBot: React.FC<{ sessionId: string }> = ({ sessionId }) => {
             isUser: msg.isUser,
           }))
         );
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching chat history:", error);
+        setLoading(false);
       });
-  };
-
-  // Toggle Chat Window
-  const toggleChatWindow = () => {
-    setIsOpen((prevState) => {
-      if (!prevState) {
-        fetchChatHistory(); // Fetch history when opening
-      }
-      return !prevState;
-    });
   };
 
   // Handle Sending Message
@@ -263,36 +261,37 @@ const AdminChatBot: React.FC<{ sessionId: string }> = ({ sessionId }) => {
 
   return (
     <div>
-      <ChatButton onClick={toggleChatWindow}>
-        <FaHeadset />
-      </ChatButton>
       <ChatWindow isOpen={isOpen}>
         <Header>
           <HeaderUserInfo>
             <FaUserShield />
             <UserName>Admin</UserName>
           </HeaderUserInfo>
-          <CloseButton onClick={toggleChatWindow}>
+          <CloseButton onClick={toggleChat}>
             <FaTimes />
           </CloseButton>
         </Header>
         <MessageContainer ref={messageContainerRef}>
-          {messages.map((msg, index) => (
-            <MessageBubble key={index} isUser={msg.isUser}>
-              {!msg.isUser && (
-                <span
-                  style={{
-                    marginRight: "8px",
-                    display: "inline-flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <FaHeadset color="#4caf50" />
-                </span>
-              )}
-              {msg.text}
-            </MessageBubble>
-          ))}
+          {loading ? ( // Show loader while fetching chat history
+            <Loader />
+          ) : (
+            messages.map((msg, index) => (
+              <MessageBubble key={index} isUser={msg.isUser}>
+                {!msg.isUser && (
+                  <span
+                    style={{
+                      marginRight: "8px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <FaHeadset color="#4caf50" />
+                  </span>
+                )}
+                {msg.text}
+              </MessageBubble>
+            ))
+          )}
         </MessageContainer>
         <InputArea>
           <InputField

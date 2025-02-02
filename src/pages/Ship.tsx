@@ -2,6 +2,7 @@ import styled from "styled-components";
 import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 import SubNavBar from "../components/SubNav";
+import ChatBot from "../components/ChatBot";
 
 const Container = styled.div`
   padding: 4rem 2rem;
@@ -82,6 +83,7 @@ const Ship = () => {
           </StepCard>
         </StepContainer>
       </Container>
+      <ChatBot />
       <Footer />
     </>
   );

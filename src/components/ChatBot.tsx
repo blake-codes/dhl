@@ -110,11 +110,11 @@ const MessageBubble = styled.div<{ isUser: boolean }>`
   margin: 5px 0;
   align-self: ${({ isUser }) => (isUser ? "flex-end" : "flex-start")};
   word-wrap: break-word;
+  font-size: 14px;
 
   @media (max-width: 600px) {
-    padding: 8px;
-    max-width: 90%;
-    font-size: 12px;
+    padding: 12px;
+    font-size: 14px;
   }
 `;
 
@@ -127,21 +127,21 @@ const InputArea = styled.div`
 
 const InputField = styled.input`
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #ccc;
   border-radius: 20px;
   margin-right: 10px;
-  font-size: 14px;
+  font-size: 16px;
   transition: border-color 0.3s;
 
   @media (max-width: 600px) {
-    font-size: 12px;
-    padding: 8px;
+    font-size: 14px;
+    padding: 10px;
   }
 `;
 
 const SendButton = styled.button`
-  padding: 12px 15px;
+  padding: 14px 18px;
   background-color: #4caf50;
   color: white;
   border: none;
@@ -155,8 +155,8 @@ const SendButton = styled.button`
   }
 
   @media (max-width: 600px) {
-    padding: 10px 12px;
-    font-size: 16px;
+    padding: 12px 14px;
+    font-size: 18px;
   }
 `;
 
