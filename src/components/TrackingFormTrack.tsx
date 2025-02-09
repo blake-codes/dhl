@@ -77,6 +77,12 @@ const TrackingFormTrack = () => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSubmit();
+    }
+  };
+
   return (
     <FormContainer>
       <Title>Track Your Shipment</Title>
@@ -85,6 +91,7 @@ const TrackingFormTrack = () => {
           placeholder="Enter your Tracking number(s)"
           value={trackingNumber}
           onChange={(e) => setTrackingNumber(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
         <Button onClick={handleSubmit}>Track</Button>
       </InputContainer>
