@@ -233,6 +233,15 @@ const SubmitButton = styled.button`
   }
 `;
 
+const Loader = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 18px;
+  color: #4caf50;
+`;
+
 // ChatBot Component
 const ChatBot: React.FC = () => {
   const [messages, setMessages] = useState<
@@ -245,28 +254,45 @@ const ChatBot: React.FC = () => {
   const [showUserPrompt, setShowUserPrompt] = useState(false);
   const messageContainerRef = useRef<HTMLDivElement | null>(null);
   const socket = useRef<any>(null);
+  const [serverReady, setServerReady] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    socket.current = io("https://dhl-server.onrender.com");
+    const initializeSocket = () => {
+      socket.current = io("https://dhl-server.onrender.com");
+      socket.current.on(
+        "receiveMessage",
+        (data: { id: string; message: string; isUser: boolean }) => {
+          setMessages((prev) => {
+            if (prev.some((msg) => msg.id === data.id)) return prev;
+            return [
+              ...prev,
+              { id: data.id, text: data.message, isUser: data.isUser },
+            ];
+          });
+        }
+      );
+    };
 
-    socket.current.on(
-      "receiveMessage",
-      (data: { id: string; message: string; isUser: boolean }) => {
-        setMessages((prev) => {
-          // Prevent duplicate messages
-          if (prev.some((msg) => msg.id === data.id)) {
-            return prev;
-          }
-          return [
-            ...prev,
-            { id: data.id, text: data.message, isUser: data.isUser },
-          ];
-        });
+    const checkServerHealth = async () => {
+      try {
+        const response = await axios.get(
+          "https://dhl-server.onrender.com/api/auth/healthcheck"
+        );
+        console.log("Server ready:", response.data);
+        setServerReady(true);
+        initializeSocket();
+      } catch (error) {
+        console.error("Server waking up or offline:", error);
+      } finally {
+        setLoading(false);
       }
-    );
+    };
+
+    checkServerHealth();
 
     return () => {
-      socket.current.disconnect();
+      socket.current?.disconnect();
     };
   }, []);
 
@@ -276,6 +302,21 @@ const ChatBot: React.FC = () => {
         messageContainerRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const response = await axios.get(
+          "https://dhl-server.onrender.com/api/auth/healthcheck"
+        );
+        console.log("Healthcheck successful:", response.data);
+      } catch (error) {
+        console.error("Healthcheck failed:", error);
+      }
+    };
+
+    checkHealth();
+  }, []);
 
   const fetchChatHistory = (sessionId: string) => {
     axios
@@ -383,6 +424,7 @@ const ChatBot: React.FC = () => {
       <ChatButton onClick={toggleChatWindow}>
         <FaHeadset />
       </ChatButton>
+
       <ChatWindow isOpen={isOpen}>
         <Header>
           <HeaderUserInfo>
@@ -393,34 +435,61 @@ const ChatBot: React.FC = () => {
             <FaTimes />
           </CloseButton>
         </Header>
-        <MessageContainer ref={messageContainerRef}>
-          {messages.map((msg, index) => (
-            <MessageBubble key={index} isUser={msg.isUser}>
-              {!msg.isUser && (
-                <span
-                  style={{
-                    marginRight: "8px",
-                    display: "inline-flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <FaHeadset color="#4caf50" />
-                </span>
-              )}
-              {msg.text}
-            </MessageBubble>
-          ))}
-        </MessageContainer>
-        <InputArea>
-          <InputField
-            type="text"
-            placeholder="Type a message..."
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-          />
-          <SendButton onClick={handleSendMessage}>➤</SendButton>
-        </InputArea>
+        <div
+          style={{
+            flexDirection: "column",
+            display: "flex",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          {loading ? (
+            <Loader>
+              Connecting to a customer service agent,please wait...
+            </Loader>
+          ) : !serverReady ? (
+            <Loader>Starting chat,please wait...</Loader>
+          ) : (
+            <div
+              style={{
+                flexDirection: "column",
+                display: "flex",
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              {" "}
+              <MessageContainer ref={messageContainerRef}>
+                {messages.map((msg, index) => (
+                  <MessageBubble key={index} isUser={msg.isUser}>
+                    {!msg.isUser && (
+                      <span
+                        style={{
+                          marginRight: "8px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <FaHeadset color="#4caf50" />
+                      </span>
+                    )}
+                    {msg.text}
+                  </MessageBubble>
+                ))}
+              </MessageContainer>
+              <InputArea>
+                <InputField
+                  type="text"
+                  placeholder="Type a message..."
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                />
+                <SendButton onClick={handleSendMessage}>➤</SendButton>
+              </InputArea>
+            </div>
+          )}
+        </div>
       </ChatWindow>
 
       {showUserPrompt && (

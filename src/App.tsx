@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import TrackingForm from "./components/TrackingForm";
 import { GlobalStyles } from "./styles/globalStyles";
 import { AuthProvider } from "./AuthContext";
@@ -21,7 +21,7 @@ const App = () => {
   return (
     <AuthProvider>
       <GlobalStyles />
-      <BrowserRouter>
+      <Router>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/tracking/:id" element={<TrackingForm />} />
@@ -49,7 +49,7 @@ const App = () => {
 
           <Route path="/order/:trackingNumber" element={<Order />} />
         </Routes>
-      </BrowserRouter>
+      </Router>
     </AuthProvider>
   );
 };
