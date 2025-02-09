@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import axios from "axios";
-import { FaHeadset, FaTimes, FaUserShield } from "react-icons/fa";
+import { FaHeadset, FaTimes, FaUserShield, FaRedoAlt } from "react-icons/fa";
 import io from "socket.io-client";
 
 // Styled Components
@@ -114,7 +114,7 @@ const MessageBubble = styled.div<{ isUser: boolean }>`
 
   @media (max-width: 600px) {
     padding: 12px;
-    font-size: 14px;
+    font-size: 16px;
   }
 `;
 
@@ -135,7 +135,7 @@ const InputField = styled.input`
   transition: border-color 0.3s;
 
   @media (max-width: 600px) {
-    font-size: 14px;
+    font-size: 16px;
     padding: 10px;
   }
 `;
@@ -419,6 +419,18 @@ const ChatBot: React.FC = () => {
     }
   };
 
+  const handleRestartChat = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to restart the chat? This will clear your chat history."
+      )
+    ) {
+      localStorage.clear();
+      setMessages([]);
+      window.location.reload();
+    }
+  };
+
   return (
     <>
       <ChatButton onClick={toggleChatWindow}>
@@ -431,9 +443,20 @@ const ChatBot: React.FC = () => {
             <FaUserShield />
             <UserName>{userName}</UserName>
           </HeaderUserInfo>
-          <CloseButton onClick={toggleChatWindow}>
-            <FaTimes />
-          </CloseButton>
+          <div>
+            <FaRedoAlt
+              onClick={handleRestartChat}
+              title="Restart Chat"
+              style={{
+                cursor: "pointer",
+                fontSize: "20px",
+                marginRight: "10px",
+              }}
+            />
+            <CloseButton onClick={() => setIsOpen(false)}>
+              <FaTimes />
+            </CloseButton>
+          </div>
         </Header>
         <div
           style={{
