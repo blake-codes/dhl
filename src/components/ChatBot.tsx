@@ -238,8 +238,9 @@ const Loader = styled.div`
   justify-content: center;
   align-items: center;
   height: 100%;
-  font-size: 18px;
+  font-size: 14px;
   color: #4caf50;
+  padding: 10px;
 `;
 
 // ChatBot Component
