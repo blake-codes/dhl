@@ -240,7 +240,7 @@ const Loader = styled.div`
   height: 100%;
   font-size: 14px;
   color: #4caf50;
-  padding: 10px;
+  padding: 15px;
 `;
 
 // ChatBot Component

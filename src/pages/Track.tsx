@@ -13,9 +13,12 @@ const BaseContainer = styled.div`
   color: #333;
   background: #f3f4f6;
   min-height: 100vh;
+  padding: 20px;
   margin-top: 10px;
+
   @media (max-width: 768px) {
     margin-top: 60px;
+    padding: 10px;
   }
 `;
 
@@ -29,6 +32,7 @@ const Section = styled.section`
 
   @media (max-width: 768px) {
     padding: 2rem;
+    margin: 2rem 1rem;
   }
 `;
 
@@ -39,6 +43,7 @@ const Loader = styled.div`
   height: 50vh;
   font-size: 1.5rem;
   font-weight: bold;
+  text-align: center;
 `;
 
 const TrackingDetails = styled.div`
@@ -48,6 +53,11 @@ const TrackingDetails = styled.div`
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   line-height: 1.6;
   border: 1px solid #e1e1e1;
+  word-wrap: break-word;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
 `;
 
 const MovementHistory = styled.div`
@@ -80,7 +90,7 @@ const Title = styled.h2`
 `;
 
 const SubHeading = styled.h3`
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   margin-top: 2rem;
   color: #444;
 `;
@@ -127,28 +137,28 @@ const Track = () => {
             <Title>Tracking Details</Title>
             <TrackingDetails>
               <DetailText>
-                <strong>Tracking Code:</strong> {trackingInfo.trackingNumber}
+                <strong>Tracking Code:</strong> {trackingInfo?.trackingNumber}
               </DetailText>
               <DetailText>
-                <strong>Status:</strong> {trackingInfo.status}
+                <strong>Status:</strong> {trackingInfo?.status}
               </DetailText>
               <DetailText>
-                <strong>Origin:</strong> {trackingInfo.origin}
+                <strong>Origin:</strong> {trackingInfo?.origin}
               </DetailText>
               <DetailText>
-                <strong>Destination:</strong> {trackingInfo.destination}
+                <strong>Destination:</strong> {trackingInfo?.destination}
               </DetailText>
               <DetailText>
                 <strong>Current Location:</strong>{" "}
-                {trackingInfo.currentLocation}
+                {trackingInfo?.currentLocation}
               </DetailText>
 
               <SubHeading>Shipment Details</SubHeading>
               <DetailText>
-                <strong>Weight:</strong> {trackingInfo.weight}
+                <strong>Weight:</strong> {trackingInfo?.weight}
               </DetailText>
               <DetailText>
-                <strong>Dimensions:</strong> {trackingInfo.dimensions}
+                <strong>Dimensions:</strong> {trackingInfo?.dimensions}
               </DetailText>
               <DetailText>
                 <strong>Service Type:</strong> Express
@@ -156,23 +166,29 @@ const Track = () => {
 
               <MovementHistory>
                 <SubHeading>Movement History</SubHeading>
-                {trackingInfo.movementHistory.map((item: any, index: any) => (
-                  <HistoryItem key={index}>
-                    <ArrowIcon />
-                    <div>
-                      <DetailText>
-                        <strong>Date:</strong>{" "}
-                        {new Date(item.movementDate).toLocaleDateString()}
-                      </DetailText>
-                      <DetailText>
-                        <strong>Location:</strong> {item.movementLocation}
-                      </DetailText>
-                      <DetailText>
-                        <strong>Status:</strong> {item.movementStatus}
-                      </DetailText>
-                    </div>
-                  </HistoryItem>
-                ))}
+                {trackingInfo?.movementHistory?.length > 0 ? (
+                  trackingInfo.movementHistory.map(
+                    (item: any, index: number) => (
+                      <HistoryItem key={index}>
+                        <ArrowIcon />
+                        <div>
+                          <DetailText>
+                            <strong>Date:</strong>{" "}
+                            {new Date(item?.movementDate).toLocaleDateString()}
+                          </DetailText>
+                          <DetailText>
+                            <strong>Location:</strong> {item?.movementLocation}
+                          </DetailText>
+                          <DetailText>
+                            <strong>Status:</strong> {item?.movementStatus}
+                          </DetailText>
+                        </div>
+                      </HistoryItem>
+                    )
+                  )
+                ) : (
+                  <DetailText>No movement history available.</DetailText>
+                )}
               </MovementHistory>
             </TrackingDetails>
           </Section>
