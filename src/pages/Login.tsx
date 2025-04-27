@@ -26,11 +26,11 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   background-color: #f9f9f9;
-  margin: 40px 0;
   padding: 40px 20px;
 
   @media (max-width: 480px) {
     padding: 20px;
+    margin-top: 40px;
   }
 `;
 
